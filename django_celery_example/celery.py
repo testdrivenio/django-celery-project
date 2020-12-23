@@ -29,5 +29,9 @@ app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
 
 @app.task
 def add(x, y):
-    time.sleep(5)
+    # from celery.contrib import rdb
+    # rdb.set_trace()
+
+    # this is for test purposes
+    time.sleep(10)
     return x / y
