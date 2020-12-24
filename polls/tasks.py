@@ -5,6 +5,7 @@ import requests
 from celery import shared_task
 from celery.signals import task_postrun
 from celery.utils.log import get_task_logger
+from django.core.management import call_command
 
 from polls.consumers import notify_channel_layer
 
@@ -39,3 +40,8 @@ def task_postrun_handler(task_id, **kwargs):
     the event and then send it to web client
     """
     notify_channel_layer(task_id)
+
+
+@shared_task(name='task_clear_session')
+def task_clear_session():
+    call_command('clearsessions')
