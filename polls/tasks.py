@@ -9,6 +9,7 @@ from django.contrib.auth.models import User
 from django.core.management import call_command
 
 from polls.consumers import notify_channel_layer
+from polls.base_task import custom_celery_task
 
 logger = get_task_logger(__name__)
 
@@ -20,7 +21,7 @@ def sample_task(email):
     api_call(email)
 
 
-@shared_task(bind=True, autoretry_for=(Exception,), retry_kwargs={'max_retries': 7, 'countdown': 5})
+@custom_celery_task(bind=True, retry_backoff=5, max_retries=5)
 def task_process_notification(self):
     if not random.choice([0, 1]):
         # mimic random error
@@ -79,3 +80,14 @@ def task_add_subscribe(self, user_pk):
         )
     except Exception as exc:
         raise self.retry(exc=exc)
+
+
+@custom_celery_task(max_retries=3)
+def task_transaction_test():
+    from .views import random_username
+    username = random_username()
+    user = User.objects.create_user(username, 'lennon@thebeatles.com', 'johnpassword')
+    user.save()
+    logger.info(f'send email to {user.pk}')
+    # this cause db rollback because of transaction.atomic
+    raise Exception('test')
