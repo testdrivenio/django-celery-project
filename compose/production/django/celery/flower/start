@@ -13,7 +13,7 @@ until worker_ready; do
 done
 >&2 echo 'Celery workers is available'
 
-flower \
+exec flower --persistent=1 --db=/app/flower_db/flower.db \
     --app=django_celery_example \
     --broker="${CELERY_BROKER}" \
     --basic_auth="${CELERY_FLOWER_USER}:${CELERY_FLOWER_PASSWORD}"

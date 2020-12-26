@@ -9,7 +9,7 @@ services:
       - mediafiles:/app/mediafiles
     ports:
       - 80:80
-      - 5555:5555
+      - 5559:5555
       - 15672:15672
     depends_on:
       - web
@@ -85,13 +85,36 @@ services:
     volumes:
       - staticfiles:/app/staticfiles
       - mediafiles:/app/mediafiles
+      - flower_db:/app/flower_db
     env_file:
       - ./.env/.prod-sample
     depends_on:
       - redis
       - db
 
+
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - 9090:9090
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    depends_on:
+      - cadvisor
+
+  cadvisor:
+    image: google/cadvisor
+    container_name: cadvisor
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+
 volumes:
   postgres_data:
   staticfiles:
   mediafiles:
+  flower_db:

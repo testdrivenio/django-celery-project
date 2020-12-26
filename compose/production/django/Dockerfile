@@ -47,6 +47,7 @@ RUN chmod +x /start-flower
 RUN mkdir /app
 RUN mkdir /app/staticfiles
 RUN mkdir /app/mediafiles
+RUN mkdir /app/flower_db
 WORKDIR /app
 
 # copy project code
