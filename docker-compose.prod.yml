@@ -1,0 +1,97 @@
+version: '3.8'
+
+services:
+
+  nginx:
+    build: ./compose/production/nginx
+    volumes:
+      - staticfiles:/app/staticfiles
+      - mediafiles:/app/mediafiles
+    ports:
+      - 80:80
+      - 5555:5555
+      - 15672:15672
+    depends_on:
+      - web
+      - flower
+
+  web:
+    build:
+      context: .
+      dockerfile: ./compose/production/django/Dockerfile
+    command: /start
+    volumes:
+      - staticfiles:/app/staticfiles
+      - mediafiles:/app/mediafiles
+    env_file:
+      - ./.env/.prod-sample
+    depends_on:
+      - redis
+      - db
+
+  db:
+    image: postgres:12.0-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_DB=hello_django_dev
+      - POSTGRES_USER=hello_django
+      - POSTGRES_PASSWORD=hello_django
+
+  redis:
+    image: redis:5-alpine
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    env_file:
+      - ./.env/.prod-sample
+
+  celery_worker:
+    build:
+      context: .
+      dockerfile: ./compose/production/django/Dockerfile
+    image: django_celery_example_celery_worker
+    command: /start-celeryworker
+    volumes:
+      - staticfiles:/app/staticfiles
+      - mediafiles:/app/mediafiles
+    env_file:
+      - ./.env/.prod-sample
+    depends_on:
+      - redis
+      - db
+
+  celery_beat:
+    build:
+      context: .
+      dockerfile: ./compose/production/django/Dockerfile
+    image: django_celery_example_celery_beat
+    command: /start-celerybeat
+    volumes:
+      - staticfiles:/app/staticfiles
+      - mediafiles:/app/mediafiles
+    env_file:
+      - ./.env/.prod-sample
+    depends_on:
+      - redis
+      - db
+
+  flower:
+    build:
+      context: .
+      dockerfile: ./compose/production/django/Dockerfile
+    image: django_celery_example_celery_flower
+    command: /start-flower
+    volumes:
+      - staticfiles:/app/staticfiles
+      - mediafiles:/app/mediafiles
+    env_file:
+      - ./.env/.prod-sample
+    depends_on:
+      - redis
+      - db
+
+volumes:
+  postgres_data:
+  staticfiles:
+  mediafiles:
