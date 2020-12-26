@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'polls',
     'channels',
     'django_celery_beat',
+    'tdd',
 ]
 
 MIDDLEWARE = [
