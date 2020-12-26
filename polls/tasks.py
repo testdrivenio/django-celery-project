@@ -5,6 +5,7 @@ import requests
 from celery import shared_task
 from celery.signals import task_postrun
 from celery.utils.log import get_task_logger
+from django.contrib.auth.models import User
 from django.core.management import call_command
 
 from polls.consumers import notify_channel_layer
@@ -19,18 +20,13 @@ def sample_task(email):
     api_call(email)
 
 
-@shared_task(bind=True)
+@shared_task(bind=True, autoretry_for=(Exception,), retry_kwargs={'max_retries': 7, 'countdown': 5})
 def task_process_notification(self):
-    try:
-        if not random.choice([0, 1]):
-            # mimic random error
-            raise Exception()
+    if not random.choice([0, 1]):
+        # mimic random error
+        raise Exception()
 
-        # this would block the I/O
-        requests.post('https://httpbin.org/delay/5')
-    except Exception as e:
-        logger.error('exception raised, it would be retry after 5 seconds')
-        raise self.retry(exc=e, countdown=5)
+    requests.post('https://httpbin.org/delay/5')
 
 
 @task_postrun.connect
@@ -60,3 +56,26 @@ def dynamic_example_two():
 @shared_task(name='high_priority:dynamic_example_three')
 def dynamic_example_three():
     logger.info('Example Three')
+
+
+@shared_task()
+def task_send_welcome_email(user_pk):
+    user = User.objects.get(pk=user_pk)
+    logger.info(f'send email to {user.email} {user.pk}')
+
+
+@shared_task()
+def task_test_logger():
+    logger.info('test')
+
+
+@shared_task(bind=True)
+def task_add_subscribe(self, user_pk):
+    try:
+        user = User.objects.get(pk=user_pk)
+        requests.post(
+            'https://httpbin.org/delay/5',
+            data={'email': user.email},
+        )
+    except Exception as exc:
+        raise self.retry(exc=exc)

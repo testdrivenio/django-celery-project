@@ -1,15 +1,24 @@
 import json
 import logging
 import random
+import time
 
 import requests
 from celery.result import AsyncResult
-from django.http import JsonResponse, HttpResponse
+from django.contrib.auth.models import User
+from django.db import transaction
+from django.http import JsonResponse, HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
+from string import ascii_lowercase
 
 from polls.forms import YourForm
-from polls.tasks import sample_task, task_process_notification
+from polls.tasks import (
+    sample_task,
+    task_process_notification,
+    task_send_welcome_email,
+    task_add_subscribe,
+)
 
 
 logger = logging.getLogger(__name__)
@@ -24,6 +33,10 @@ def api_call(email):
 
     # used for simulating a call to a third-party api
     requests.post('https://httpbin.org/delay/5')
+
+def random_username():
+    username = ''.join([random.choice(ascii_lowercase) for i in range(5)])
+    return username
 
 
 # views
@@ -96,3 +109,38 @@ def form_ws(request):
 
     form = YourForm()
     return render(request, 'form_ws.html', {'form': form})
+
+
+@transaction.atomic
+def transaction_celery(request):
+    username = random_username()
+    user = User.objects.create_user(username, 'lennon@thebeatles.com', 'johnpassword')
+    logger.info(f'create user {user.pk}')
+    # the task does not get called until after the transaction is committed
+    transaction.on_commit(lambda: task_send_welcome_email.delay(user.pk))
+
+    time.sleep(1)
+    return HttpResponse('test')
+
+
+@transaction.atomic
+def subscribe(request):
+    """
+    This Django view saves user info to the db and sends task to Celery worker
+    to subscribe the user to the database
+    """
+    if request.method == 'POST':
+        form = YourForm(request.POST)
+        if form.is_valid():
+            instance, flag = User.objects.get_or_create(
+                username=form.cleaned_data['name'],
+                email=form.cleaned_data['email'],
+            )
+            transaction.on_commit(
+                lambda: task_add_subscribe.delay(instance.pk)
+            )
+            return HttpResponseRedirect('')
+    else:
+        form = YourForm()
+
+    return render(request, 'subscribe.html', {'form': form})
