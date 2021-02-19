@@ -1,1 +1,1 @@
-https://testdriven.io/courses/django-celery/conclusion/
+https://testdriven.io/courses/django-celery/
