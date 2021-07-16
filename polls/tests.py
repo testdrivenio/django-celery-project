@@ -36,10 +36,7 @@ class SubscribeViewTestCase2(TestCase):
     """
     @patch('polls.views.task_add_subscribe.delay')
     def test_subscribe_post_succeed(self, mock_task_add_subscribe_delay):
-        # https://github.com/adamchainz/django-capture-on-commit-callbacks
-        from django_capture_on_commit_callbacks import capture_on_commit_callbacks
-
-        with capture_on_commit_callbacks(execute=True) as callbacks:
+        with self.captureOnCommitCallbacks(execute=True) as callbacks:
             response = self.client.post(
                 reverse('subscribe'),
                 {

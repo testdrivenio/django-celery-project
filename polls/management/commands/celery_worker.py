@@ -13,7 +13,7 @@ def restart_celery():
 
     subprocess.call(shlex.split(cmd))
     subprocess.call(shlex.split(
-        'celery worker -A django_celery_example --loglevel=info -Q high_priority,default')
+        'celery -A django_celery_example worker --loglevel=info -Q high_priority,default')
     )
 
 

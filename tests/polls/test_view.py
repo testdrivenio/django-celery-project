@@ -6,12 +6,11 @@ from django.urls import reverse
 from polls import tasks
 
 
-def test_subscribe_post_succeed(db, monkeypatch, client, user):
+def test_subscribe_post_succeed(db, monkeypatch, client, user, django_capture_on_commit_callbacks):
     mock_task_add_subscribe_delay = mock.MagicMock(name="task_add_subscribe_delay")
     monkeypatch.setattr(tasks.task_add_subscribe, 'delay', mock_task_add_subscribe_delay)
 
-    from django_capture_on_commit_callbacks import capture_on_commit_callbacks
-    with capture_on_commit_callbacks(execute=True) as callbacks:
+    with django_capture_on_commit_callbacks(execute=True) as callbacks:
         response = client.post(
             reverse('subscribe'),
             {
