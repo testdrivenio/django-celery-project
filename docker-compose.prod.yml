@@ -42,7 +42,7 @@ services:
     image: redis:5-alpine
 
   rabbitmq:
-    image: rabbitmq:3-management
+    image: rabbitmq:3.8-management
     env_file:
       - ./.env/.prod-sample
 
