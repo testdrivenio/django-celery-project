@@ -53,7 +53,7 @@ def test_post_fail(client, db):
     assert not Member.objects.count()
 
 
-def test_celery_task(client, db, monkeypatch):
+def test_celery_task(client, db, monkeypatch, django_capture_on_commit_callbacks):
     fake_member = MemberFactory.build()
     password = fake.password()
     form_data = {
@@ -70,8 +70,7 @@ def test_celery_task(client, db, monkeypatch):
     mock_generate_avatar_thumbnail_delay = mock.MagicMock(name="generate_avatar_thumbnail")
     monkeypatch.setattr(tasks.generate_avatar_thumbnail, 'delay', mock_generate_avatar_thumbnail_delay)
 
-    from django_capture_on_commit_callbacks import capture_on_commit_callbacks
-    with capture_on_commit_callbacks(execute=True) as callbacks:
+    with django_capture_on_commit_callbacks(execute=True) as callbacks:
         response = client.post(reverse('member_signup'), form_data)
         assert response.status_code == 200
 
