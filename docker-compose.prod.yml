@@ -9,7 +9,7 @@ services:
       - mediafiles:/app/mediafiles
     ports:
       - 80:80
-      - 5559:5555
+      - 5555:5555
       - 15672:15672
     depends_on:
       - web
@@ -30,7 +30,7 @@ services:
       - db
 
   db:
-    image: postgres:12.0-alpine
+    image: postgres:14-alpine
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     environment:
@@ -39,10 +39,10 @@ services:
       - POSTGRES_PASSWORD=hello_django
 
   redis:
-    image: redis:5-alpine
+    image: redis:6-alpine
 
   rabbitmq:
-    image: rabbitmq:3.8-management
+    image: rabbitmq:3-management
     env_file:
       - ./.env/.prod-sample
 
@@ -91,7 +91,6 @@ services:
     depends_on:
       - redis
       - db
-
 
   prometheus:
     image: prom/prometheus

@@ -1,13 +1,13 @@
 import json
 import random
 
+from django.contrib.auth.models import User
+
 import requests
 from celery import shared_task
-from celery.signals import task_postrun
 from celery.utils.log import get_task_logger
-from django.contrib.auth.models import User
-from django.core.management import call_command
 
+from celery.signals import task_postrun
 from polls.consumers import notify_channel_layer
 from polls.base_task import custom_celery_task
 
@@ -41,6 +41,7 @@ def task_postrun_handler(task_id, **kwargs):
 
 @shared_task(name='task_clear_session')
 def task_clear_session():
+    from django.core.management import call_command
     call_command('clearsessions')
 
 

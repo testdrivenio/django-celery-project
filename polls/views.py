@@ -34,6 +34,7 @@ def api_call(email):
     # used for simulating a call to a third-party api
     requests.post('https://httpbin.org/delay/5')
 
+
 def random_username():
     username = ''.join([random.choice(ascii_lowercase) for i in range(5)])
     return username
@@ -41,8 +42,8 @@ def random_username():
 
 # views
 
-def form(request):
-    if request.is_ajax() and request.method == 'POST':
+def subscribe(request):
+    if request.method == 'POST':
         form = YourForm(request.POST)
         if form.is_valid():
             task = sample_task.delay(form.cleaned_data['email'])
@@ -94,11 +95,11 @@ def webhook_test2(request):
     return HttpResponse('pong')
 
 
-def form_ws(request):
+def subscribe_ws(request):
     """
     Use Websocket to get notification of Celery task, instead of using ajax polling
     """
-    if request.is_ajax() and request.method == 'POST':
+    if request.method == 'POST':
         form = YourForm(request.POST)
         if form.is_valid():
             task = sample_task.delay(form.cleaned_data['email'])
@@ -124,7 +125,7 @@ def transaction_celery(request):
 
 
 @transaction.atomic
-def subscribe(request):
+def user_subscribe(request):
     """
     This Django view saves user info to the db and sends task to Celery worker
     to subscribe the user to the database
@@ -133,7 +134,7 @@ def subscribe(request):
         form = YourForm(request.POST)
         if form.is_valid():
             instance, flag = User.objects.get_or_create(
-                username=form.cleaned_data['name'],
+                username=form.cleaned_data['username'],
                 email=form.cleaned_data['email'],
             )
             transaction.on_commit(
@@ -143,4 +144,4 @@ def subscribe(request):
     else:
         form = YourForm()
 
-    return render(request, 'subscribe.html', {'form': form})
+    return render(request, 'user_subscribe.html', {'form': form})

@@ -5,7 +5,6 @@ from celery.utils.time import get_exponential_backoff_interval
 
 
 class custom_celery_task:
-
     EXCEPTION_BLOCK_LIST = (
         IndexError,
         KeyError,
@@ -15,8 +14,8 @@ class custom_celery_task:
     )
 
     def __init__(self, *args, **kwargs):
-            self.task_args = args
-            self.task_kwargs = kwargs
+        self.task_args = args
+        self.task_kwargs = kwargs
 
     def __call__(self, func):
         @functools.wraps(func)

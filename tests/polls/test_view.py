@@ -12,9 +12,9 @@ def test_subscribe_post_succeed(db, monkeypatch, client, user, django_capture_on
 
     with django_capture_on_commit_callbacks(execute=True) as callbacks:
         response = client.post(
-            reverse('subscribe'),
+            reverse('user_subscribe'),
             {
-                'name': user.username,
+                'username': user.username,
                 'email': user.email,
             }
         )

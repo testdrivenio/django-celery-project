@@ -5,19 +5,19 @@ from django.contrib.auth.models import User
 from django.test import TestCase, TransactionTestCase, override_settings
 from django.urls import reverse
 
-from polls.factories import UserFactory
 from polls.tasks import task_add_subscribe
+from polls.factories import UserFactory
 
 
-class SubscribeTestCase(TransactionTestCase):
+class UserSubscribeTestCase(TransactionTestCase):
 
     @override_settings(CELERY_TASK_ALWAYS_EAGER=True)
     @patch('polls.views.requests.post')
     def test_subscribe_post_succeed(self, mock_requests_post):
         response = self.client.post(
-            reverse('subscribe'),
+            reverse('user_subscribe'),
             {
-                'name': 'test',
+                'username': 'test',
                 'email': 'test@email.com',
             }
         )
@@ -30,7 +30,7 @@ class SubscribeTestCase(TransactionTestCase):
         )
 
 
-class SubscribeViewTestCase2(TestCase):
+class UserSubscribeViewTestCase(TestCase):
     """
     This class only tests the Django view
     """
@@ -38,9 +38,9 @@ class SubscribeViewTestCase2(TestCase):
     def test_subscribe_post_succeed(self, mock_task_add_subscribe_delay):
         with self.captureOnCommitCallbacks(execute=True) as callbacks:
             response = self.client.post(
-                reverse('subscribe'),
+                reverse('user_subscribe'),
                 {
-                    'name': 'test',
+                    'username': 'test',
                     'email': 'test@email.com',
                 }
             )
