@@ -169,6 +169,16 @@ CELERY_TASK_QUEUES = (
     Queue('low_priority'),
 )
 
+# manual task routing
+
+# CELERY_TASK_ROUTES = {
+#     'django_celery_example.celery.*': {
+#         'queue': 'high_priority',
+#     },
+# }
+
+# dynamic task routing
+
 def route_task(name, args, kwargs, options, task=None, **kw):
     if ':' in name:
         queue, _ = name.split(':')
