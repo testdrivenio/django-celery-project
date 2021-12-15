@@ -3,6 +3,12 @@
 # This shell script quickly deploys your project to your
 # DigitalOcean Droplet
 
+if [ -z "$DIGITAL_OCEAN_IP_ADDRESS" ]
+then
+    echo "DIGITAL_OCEAN_IP_ADDRESS not defined"
+    exit 0
+fi
+
 # generate TAR file from git
 git archive --format tar --output ./project.tar master
 

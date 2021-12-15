@@ -1,100 +1,133 @@
-<form class="your-form" method="post">
-  {% csrf_token %}
-  {{ form }}
-  <div class="messages"></div>
-  <button type="submit">Submit</button>
-<form>
+<!DOCTYPE html>
+<html lang="en">
 
-<script
-  src="https://code.jquery.com/jquery-3.5.1.min.js"
-  integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0="
-  crossorigin="anonymous">
-</script>
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Celery example</title>
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.1.3/css/bootstrap.min.css"
+        integrity="sha512-GQGU0fMMi238uA+a/bdWJfpUGKUkBdgfFdgBm72SUQ6BeyWjoY/ton0tEjH+OSH9iP4Dfh+7HM0I9f5eR0L/4w=="
+        crossorigin="anonymous"
+        referrerpolicy="no-referrer" />
+</head>
 
-<script>
-  // code here setup jquery to read csrf token value when sending ajax request
-  function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-      let cookies = document.cookie.split(';');
-      for (let i = 0; i < cookies.length; i++) {
-        cookie = cookies[i].trim();
-        // Does this cookie string begin with the name we want?
-        if (cookie.substring(0, name.length + 1) === (name + '=')) {
-          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-          break;
-        }
+<body>
+  <div class="container">
+    <div class="row">
+      <div class="col-12 col-md-4">
+        <form id="your-form">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label for="email" class="form-label">Email address</label>
+            {{ form.email }}
+          </div>
+          <div class="mb-3">
+            <label for="username" class="form-label">Username</label>
+            {{ form.username }}
+          </div>
+          <div class="mb-3" id="messages"></div>
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.1.3/js/bootstrap.min.js"
+          integrity="sha512-OvBgP9A2JBgiRad/mM36mkzXSXaJE9BEIENnVEmeZdITvwT09xnxLtT4twkCa8m/loMbPHsvPl0T8lRGVBwjlQ=="
+          crossorigin="anonymous"
+          referrerpolicy="no-referrer"></script>
+
+  <script>
+    function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+          const cookies = document.cookie.split(';');
+          for (let i = 0; i < cookies.length; i++) {
+              const cookie = cookies[i].trim();
+              // Does this cookie string begin with the name we want?
+              if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                  cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                  break;
+              }
+          }
       }
+      return cookieValue;
     }
-    return cookieValue;
-  }
-  const csrftoken = getCookie('csrftoken');
 
-  function csrfSafeMethod(method) {
-    // these HTTP methods do not require CSRF protection
-    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
-  }
-  $.ajaxSetup({
-    beforeSend: function(xhr, settings) {
-      if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
-        xhr.setRequestHeader("X-CSRFToken", csrftoken);
-      }
-    }
-  });
+    function update_progress(yourForm, task_id, btnHtml) {
+      fetch(`/task_status/?task_id=${task_id}`, {
+        method: 'GET',
+      })
+        .then(response => response.json())
+        .then((res) => {
+          const taskStatus = res.state;
 
-  function update_progress($form, task_id, btn_html) {
-    // send GET request to status URL
-    $.ajax({
-      url: `/task_status/?task_id=${task_id}`,
-      method: 'GET'
-    }).done((res) => {
-      const taskStatus = res.state;
+          if (taskStatus !== 'PENDING' && taskStatus !== 'PROGRESS') {
+            const msg = yourForm.querySelector('#messages');
+            const submitBtn = yourForm.querySelector('button[type="submit"]');
 
-      if (taskStatus !== 'PENDING' && taskStatus !== 'PROGRESS') {
-        if (taskStatus === 'SUCCESS'){
-          $form.find('.messages div').append('job succeeded');
-          $form.find('button:submit').html(btn_html).attr('disabled', false);
-        } else if (taskStatus === 'FAILURE') {
-          // display error message on the form
-          var errMsg = res.error;
-          $form.find('.messages div').append(errMsg);
-          $form.find('button:submit').html(btn_html).attr('disabled', false);
+            if (taskStatus === 'SUCCESS') {
+              msg.innerHTML = 'job succeeded';
+            } else if (taskStatus === 'FAILURE') {
+              // display error message on the form
+              msg.innerHTML = res.error;
+            }
+
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = btnHtml;
+          } else {
+            // the task is still running
+            setTimeout(function () {
+              update_progress(yourForm, task_id, btnHtml);
+            }, 1000);
+          }
+        })
+        .catch((error) => {
+          console.error('Error:', error)
         }
-      }
-      else {
-        // the task is still running
-        setTimeout(function () {
-          update_progress($form, task_id, btn_html);
-        }, 1000);
-      }
-    }).fail((err) => {
-      console.log(err)
-    });
-  }
+        );
+    }
 
-  $(document).ready(function() {
-    $('form').on('submit', function (event) {
-      event.preventDefault();
+    document.addEventListener("DOMContentLoaded", function () {
+      const yourForm = document.getElementById("your-form");
+      yourForm.addEventListener("submit", function (event) {
+        event.preventDefault();
+        const submitBtn = yourForm.querySelector('button[type="submit"]');
+        const btnHtml = submitBtn.innerHTML;
+        const spinnerHtml = 'Processing...';
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = spinnerHtml;
 
-      const $form = $('.your-form');
-      const btn_html = $form.find('button:submit').html();
-      const spinnerHtml = 'Processing...';
+        const msg = yourForm.querySelector('#messages');
+        msg.innerHTML = '';
 
-      $form.find('button:submit').attr('disabled', true).html(spinnerHtml);
-      $form.find('.messages').text('').append('<div></div>');
+        // Get all field data from the form
+        const formData = new URLSearchParams(new FormData(yourForm));
 
-      $.ajax({
-        url: '/form/',
-        type: 'POST',
-        data: $form.serialize(),
-        dataType: 'json',
-      }).done((res) => {
-        // after we get Celery task id, we start polling
-        var task_id = res.task_id;
-        update_progress($form, task_id, btn_html);
-      }).fail((err) => {
-        console.log(err);
+        fetch('/form/', {
+          method: 'POST',
+          headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+          },
+          body: formData,
+        })
+          .then(response => response.json())
+          .then((res) => {
+            // after we get Celery task id, we start polling
+            const task_id = res.task_id;
+            update_progress(yourForm, task_id, btnHtml);
+            console.log(res);
+          })
+          .catch((error) => {
+            console.error('Error:', error)
+          }
+          );
       });
     });
-  });
-</script>
+
+  </script>
+
+</body>
+</html>

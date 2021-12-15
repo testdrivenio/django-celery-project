@@ -22,7 +22,7 @@ services:
       - db
 
   db:
-    image: postgres:12.0-alpine
+    image: postgres:14-alpine
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     environment:
@@ -31,7 +31,7 @@ services:
       - POSTGRES_PASSWORD=hello_django
 
   redis:
-    image: redis:5-alpine
+    image: redis:6-alpine
 
   celery_worker:
     build:
@@ -39,11 +39,6 @@ services:
       dockerfile: ./compose/local/django/Dockerfile
     image: django_celery_example_celery_worker
     command: /start-celeryworker
-    # logging:
-    #   driver: syslog
-    #   options:
-    #     syslog-address: "tcp+tls://logs2.papertrailapp.com:45883"
-    #     tag: "{{.Name}}/{{.ID}}"
     volumes:
       - .:/app
     env_file:
@@ -70,7 +65,7 @@ services:
     build:
       context: .
       dockerfile: ./compose/local/django/Dockerfile
-    image: django_celery_example_celey_flower
+    image: django_celery_example_celery_flower
     command: /start-flower
     volumes:
       - .:/app

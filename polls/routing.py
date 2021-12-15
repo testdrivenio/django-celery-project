@@ -1,8 +1,8 @@
-from django.conf.urls import url
+from django.urls import path
 
 from polls import consumers
 
 
 urlpatterns = [
-    url(r'^ws/task_status/(?P<task_id>[\w-]+)/?$', consumers.TaskStatusConsumer.as_asgi()),
+    path('ws/task_status/<task_id>/', consumers.TaskStatusConsumer.as_asgi()),
 ]

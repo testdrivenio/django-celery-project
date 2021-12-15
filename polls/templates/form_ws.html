@@ -1,69 +1,126 @@
-<form class="your-form" method="post">
-  {% csrf_token %}
-  {{ form }}
-  <div class="messages"></div>
-  <button type="submit">Submit</button>
-</form>
+<!DOCTYPE html>
+<html lang="en">
 
-<script
-  src="https://code.jquery.com/jquery-3.5.1.min.js"
-  integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0="
-  crossorigin="anonymous">
-</script>
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Celery example</title>
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.1.3/css/bootstrap.min.css"
+        integrity="sha512-GQGU0fMMi238uA+a/bdWJfpUGKUkBdgfFdgBm72SUQ6BeyWjoY/ton0tEjH+OSH9iP4Dfh+7HM0I9f5eR0L/4w=="
+        crossorigin="anonymous"
+        referrerpolicy="no-referrer" />
+</head>
 
-<script>
-  function update_progress($form, task_id, btn_html) {
-    const ws_url = `/ws/task_status/${task_id}`;
-    const WS = new WebSocket((location.protocol === 'https:' ? 'wss' : 'ws') + '://' + window.location.host + ws_url);
+<body>
+  <div class="container">
+    <div class="row">
+      <div class="col-12 col-md-4">
+        <form id="your-form">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label for="email" class="form-label">Email address</label>
+            {{ form.email }}
+          </div>
+          <div class="mb-3">
+            <label for="username" class="form-label">Username</label>
+            {{ form.username }}
+          </div>
+          <div class="mb-3" id="messages"></div>
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+      </div>
+    </div>
+  </div>
 
-    WS.onopen = function (event) {
-      // this is not necessary but it can help you understand the whole workflow.
-      WS.send(JSON.stringify({'type': 'check_task_status'}));
-    };
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.1.3/js/bootstrap.min.js"
+          integrity="sha512-OvBgP9A2JBgiRad/mM36mkzXSXaJE9BEIENnVEmeZdITvwT09xnxLtT4twkCa8m/loMbPHsvPl0T8lRGVBwjlQ=="
+          crossorigin="anonymous"
+          referrerpolicy="no-referrer"></script>
 
-    WS.onmessage = function (event) {
-      const res = JSON.parse(event.data);
-      const taskStatus = res.state;
+  <script>
+    function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+          const cookies = document.cookie.split(';');
+          for (let i = 0; i < cookies.length; i++) {
+              const cookie = cookies[i].trim();
+              // Does this cookie string begin with the name we want?
+              if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                  cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                  break;
+              }
+          }
+      }
+      return cookieValue;
+    }
 
-      if (taskStatus !== 'PENDING' && taskStatus !== 'PROGRESS') {
-        if (taskStatus === 'SUCCESS') {
-          $form.find('.messages div').append('job succeeded');
-          $form.find('button:submit').html(btn_html).attr('disabled', false);
-        } else if (taskStatus === 'FAILURE') {
-          // display error message on the form
-          const errMsg = res.error;
-          $form.find('.messages div').append(errMsg);
-          $form.find('button:submit').html(btn_html).attr('disabled', false);
+    function update_progress(yourForm, task_id, btnHtml) {
+      const ws_url = `/ws/task_status/${task_id}/`;
+      const WS = new WebSocket((location.protocol === 'https:' ? 'wss' : 'ws') + '://' + window.location.host + ws_url);
+
+      WS.onmessage = function (event) {
+        const res = JSON.parse(event.data);
+        const taskStatus = res.state;
+
+        if (taskStatus !== 'PENDING' && taskStatus !== 'PROGRESS') {
+          const msg = yourForm.querySelector('#messages');
+          const submitBtn = yourForm.querySelector('button[type="submit"]');
+
+          if (taskStatus === 'SUCCESS') {
+            msg.innerHTML = 'job succeeded';
+          } else if (taskStatus === 'FAILURE') {
+            msg.innerHTML = res.error;
+          }
+
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = btnHtml;
+
+          // close the websocket because we do not need it now
+          WS.close();
         }
-        // close the websocket because we do not need it now
-        WS.close();
       }
     }
-  }
 
-  $(document).ready(function() {
-    $('form').on('submit', function (event) {
-      event.preventDefault();
+    document.addEventListener("DOMContentLoaded", function () {
+      const yourForm = document.getElementById("your-form");
+      yourForm.addEventListener("submit", function (event) {
+        event.preventDefault();
+        const submitBtn = yourForm.querySelector('button[type="submit"]');
+        const btnHtml = submitBtn.innerHTML;
+        const spinnerHtml = 'Processing...';
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = spinnerHtml;
 
-      const $form = $('.your-form');
-      const btn_html = $form.find('button:submit').html();
-      const spinnerHtml = 'Processing...';
+        const msg = yourForm.querySelector('#messages');
+        msg.innerHTML = '';
 
-      $form.find('button:submit').attr('disabled', true).html(spinnerHtml);
-      $form.find('.messages').text('').append('<div></div>');
+        // Get all field data from the form
+        const formData = new URLSearchParams(new FormData(yourForm));
 
-      $.ajax({
-        url: '/form_ws/',
-        type: 'POST',
-        data: $form.serialize(),
-        dataType: 'json',
-      }).done((res) => {
-        // after we get Celery task id, we start polling
-        var task_id = res.task_id;
-        update_progress($form, task_id, btn_html);
-      }).fail((err) => {
-        console.log(err);
+        fetch('/form/', {
+          method: 'POST',
+          headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+          },
+          body: formData,
+        })
+          .then(response => response.json())
+          .then((res) => {
+            // after we get Celery task id, we start polling
+            const task_id = res.task_id;
+            update_progress(yourForm, task_id, btnHtml);
+            console.log(res);
+          })
+          .catch((error) => {
+            console.error('Error:', error)
+          }
+          );
       });
     });
-  });
-</script>
+
+  </script>
+
+</body>
+</html>
