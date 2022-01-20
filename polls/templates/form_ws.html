@@ -99,7 +99,7 @@
         // Get all field data from the form
         const formData = new URLSearchParams(new FormData(yourForm));
 
-        fetch('/form/', {
+        fetch('/form_ws/', {
           method: 'POST',
           headers: {
             'X-CSRFToken': getCookie('csrftoken'),
