@@ -3,3 +3,4 @@ from polls.factories import UserFactory
 
 
 register(UserFactory)
+

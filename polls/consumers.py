@@ -11,15 +11,17 @@ def get_task_info(task_id):
     return task info according to the task_id
     """
     task = AsyncResult(task_id)
-    if task.state == 'FAILURE':
+    state = task.state
+    
+    if state == 'FAILURE':
         error = str(task.result)
         response = {
-            'state': task.state,
+            'state': state,
             'error': error,
         }
     else:
         response = {
-            'state': task.state,
+            'state': state,
         }
     return response
 
@@ -30,6 +32,8 @@ def notify_channel_layer(task_id):
 
     Since Celery now still not support `asyncio`, so we should use async_to_sync
     to make it synchronous
+
+    https://channels.readthedocs.io/en/stable/topics/channel_layers.html#using-outside-of-consumers
     """
     channel_layer = get_channel_layer()
     async_to_sync(channel_layer.group_send)(
