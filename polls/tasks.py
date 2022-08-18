@@ -1,15 +1,18 @@
+from celery import shared_task
+
+import logging
 import json
 import random
-
-from django.contrib.auth.models import User
 
 import requests
 from celery import shared_task
 from celery.utils.log import get_task_logger
-
 from celery.signals import task_postrun
 from polls.consumers import notify_channel_layer
+from django.contrib.auth.models import User
+
 from polls.base_task import custom_celery_task
+
 
 logger = get_task_logger(__name__)
 
@@ -30,6 +33,7 @@ def task_process_notification(self):
     requests.post('https://httpbin.org/delay/5')
 
 
+
 @task_postrun.connect
 def task_postrun_handler(task_id, **kwargs):
     """
@@ -39,10 +43,12 @@ def task_postrun_handler(task_id, **kwargs):
     notify_channel_layer(task_id)
 
 
+
 @shared_task(name='task_clear_session')
 def task_clear_session():
     from django.core.management import call_command
     call_command('clearsessions')
+
 
 
 @shared_task(name='default:dynamic_example_one')

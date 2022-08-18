@@ -1,8 +1,9 @@
 """
-https://docs.celeryproject.org/en/stable/django/first-steps-with-django.html
+https://docs.celeryq.dev/en/stable/django/first-steps-with-django.html
 """
 import os
 import logging
+
 from celery import Celery
 from celery.signals import after_setup_logger
 
@@ -19,7 +20,7 @@ app = Celery("django_celery_example")
 # config keys has `CELERY` prefix
 app.config_from_object('django.conf:settings', namespace='CELERY')
 
-# discover and load tasks.py in django apps
+# discover and load tasks.py from from all registered Django apps
 app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
 
 
