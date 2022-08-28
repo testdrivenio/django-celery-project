@@ -30,6 +30,7 @@ class UserSubscribeTestCase(TransactionTestCase):
         )
 
 
+
 class UserSubscribeViewTestCase(TestCase):
     """
     This class only tests the Django view
@@ -56,7 +57,7 @@ class UserSubscribeViewTestCase(TestCase):
             user.pk
         )
 
-
+            
 class TaskAddSubscribeTest(TestCase):
     """
     Only test the Celery task

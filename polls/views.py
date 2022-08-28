@@ -61,17 +61,20 @@ def task_status(request):
 
     if task_id:
         task = AsyncResult(task_id)
-        if task.state == 'FAILURE':
+        state = task.state
+
+        if state == 'FAILURE':
             error = str(task.result)
             response = {
-                'state': task.state,
+                'state': state,
                 'error': error,
             }
         else:
             response = {
-                'state': task.state,
+                'state': state,
             }
         return JsonResponse(response)
+
 
 
 @csrf_exempt
@@ -85,14 +88,16 @@ def webhook_test(request):
     return HttpResponse('pong')
 
 
+
 @csrf_exempt
-def webhook_test2(request):
+def webhook_test_async(request):
     """
     Use celery worker to handle the notification
     """
     task = task_process_notification.delay()
     logger.info(task.id)
     return HttpResponse('pong')
+
 
 
 def subscribe_ws(request):
@@ -112,6 +117,7 @@ def subscribe_ws(request):
     return render(request, 'form_ws.html', {'form': form})
 
 
+
 @transaction.atomic
 def transaction_celery(request):
     username = random_username()
@@ -122,6 +128,7 @@ def transaction_celery(request):
 
     time.sleep(1)
     return HttpResponse('test')
+
 
 
 @transaction.atomic
@@ -145,3 +152,4 @@ def user_subscribe(request):
         form = YourForm()
 
     return render(request, 'user_subscribe.html', {'form': form})
+

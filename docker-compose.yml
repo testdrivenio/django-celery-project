@@ -26,12 +26,12 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     environment:
-      - POSTGRES_DB=hello_django_dev
+      - POSTGRES_DB=hello_django
       - POSTGRES_USER=hello_django
       - POSTGRES_PASSWORD=hello_django
 
   redis:
-    image: redis:6-alpine
+    image: redis:7-alpine
 
   celery_worker:
     build:

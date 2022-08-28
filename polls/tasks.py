@@ -1,15 +1,18 @@
+from celery import shared_task
+
+import logging
 import json
 import random
-
-from django.contrib.auth.models import User
 
 import requests
 from celery import shared_task
 from celery.utils.log import get_task_logger
-
 from celery.signals import task_postrun
 from polls.consumers import notify_channel_layer
+from django.contrib.auth.models import User
+
 from polls.base_task import custom_celery_task
+
 
 logger = get_task_logger(__name__)
 

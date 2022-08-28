@@ -5,4 +5,4 @@ set -o pipefail
 set -o nounset
 
 
-celery -A django_celery_example beat -l INFO
+exec celery -A django_celery_example beat -l INFO
