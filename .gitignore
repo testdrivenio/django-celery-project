@@ -1,8 +1,0 @@
-__pycache__
-env
-*.sqlite3
-celerybeat-schedule
-celerybeat.pid
-celery.log
-.coverage
-htmlcov
