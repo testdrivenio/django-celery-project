@@ -1,0 +1,17 @@
+<h2>Member Sign Up</h2>
+<form method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+
+  {% for field in form %}
+    <div>
+      {{ field.label_tag }}<br>
+      {{ field }}
+      {% for error in field.errors %}
+        <p style="color: red">{{ error }}</p>
+      {% endfor %}
+    </div>
+    <br>
+  {% endfor %}
+
+  <button type="submit">Sign Up</button>
+</form>
