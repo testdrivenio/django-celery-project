@@ -1,4 +1,4 @@
-FROM python:3.10-slim-buster
+FROM python:3.11-slim-buster
 
 ENV PYTHONUNBUFFERED 1
 
@@ -9,6 +9,8 @@ RUN apt-get update \
   && apt-get install -y libpq-dev \
   # Translations dependencies
   && apt-get install -y gettext \
+  # Additional dependencies
+  && apt-get install -y git \
   # cleaning up unused files
   && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
   && rm -rf /var/lib/apt/lists/*

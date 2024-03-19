@@ -1,12 +1,12 @@
-from unittest import mock
 import pytest
+from unittest import mock
 from django.contrib.auth.models import User
 
 from polls.factories import UserFactory
 from polls.base_task import custom_celery_task
 
-# tasks
 
+# tasks
 
 @custom_celery_task()
 def successful_task(user_pk):
@@ -33,8 +33,8 @@ def throwing_no_retry_task():
 def throwing_retry_task():
     raise Exception
 
-# tests
 
+# tests
 
 @pytest.mark.django_db()
 def test_custom_celery_task(settings):

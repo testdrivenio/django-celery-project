@@ -20,7 +20,7 @@ echo 'Building image...'
 ssh -o StrictHostKeyChecking=no root@$DIGITAL_OCEAN_IP_ADDRESS << 'ENDSSH'
     mkdir -p /app
     rm -rf /app/* && tar -xf /tmp/project.tar -C /app
-    docker-compose -f /app/docker-compose.prod.yml build
+    docker compose -f /app/docker-compose.prod.yml build
     supervisorctl restart docker-app
 ENDSSH
 echo 'Build complete.'

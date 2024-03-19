@@ -2,6 +2,7 @@ import json
 import logging
 import random
 import time
+from functools import partial
 
 import requests
 from celery.result import AsyncResult
@@ -25,6 +26,10 @@ logger = logging.getLogger(__name__)
 
 
 # helpers
+def random_username():
+    username = ''.join([random.choice(ascii_lowercase) for i in range(5)])
+    return username
+
 
 def api_call(email):
     # used for testing a failed api call
@@ -33,11 +38,6 @@ def api_call(email):
 
     # used for simulating a call to a third-party api
     requests.post('https://httpbin.org/delay/5')
-
-
-def random_username():
-    username = ''.join([random.choice(ascii_lowercase) for i in range(5)])
-    return username
 
 
 # views
@@ -76,7 +76,6 @@ def task_status(request):
         return JsonResponse(response)
 
 
-
 @csrf_exempt
 def webhook_test(request):
     if not random.choice([0, 1]):
@@ -88,7 +87,6 @@ def webhook_test(request):
     return HttpResponse('pong')
 
 
-
 @csrf_exempt
 def webhook_test_async(request):
     """
@@ -97,7 +95,6 @@ def webhook_test_async(request):
     task = task_process_notification.delay()
     logger.info(task.id)
     return HttpResponse('pong')
-
 
 
 def subscribe_ws(request):
@@ -117,18 +114,16 @@ def subscribe_ws(request):
     return render(request, 'form_ws.html', {'form': form})
 
 
-
 @transaction.atomic
 def transaction_celery(request):
     username = random_username()
     user = User.objects.create_user(username, 'lennon@thebeatles.com', 'johnpassword')
     logger.info(f'create user {user.pk}')
     # the task does not get called until after the transaction is committed
-    transaction.on_commit(lambda: task_send_welcome_email.delay(user.pk))
+    transaction.on_commit(partial(task_send_welcome_email.delay, user.pk))
 
     time.sleep(1)
     return HttpResponse('test')
-
 
 
 @transaction.atomic
@@ -145,11 +140,10 @@ def user_subscribe(request):
                 email=form.cleaned_data['email'],
             )
             transaction.on_commit(
-                lambda: task_add_subscribe.delay(instance.pk)
+                partial(task_add_subscribe.delay, instance.pk)
             )
             return HttpResponseRedirect('')
     else:
         form = YourForm()
 
     return render(request, 'user_subscribe.html', {'form': form})
-

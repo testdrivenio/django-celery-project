@@ -1,6 +1,3 @@
-from celery import shared_task
-
-import logging
 import json
 import random
 
@@ -10,7 +7,6 @@ from celery.utils.log import get_task_logger
 from celery.signals import task_postrun
 from polls.consumers import notify_channel_layer
 from django.contrib.auth.models import User
-
 from polls.base_task import custom_celery_task
 
 
@@ -24,13 +20,18 @@ def sample_task(email):
     api_call(email)
 
 
-@custom_celery_task(bind=True, retry_backoff=5, max_retries=5)
+@shared_task(bind=True)
 def task_process_notification(self):
-    if not random.choice([0, 1]):
-        # mimic random error
-        raise Exception()
+    try:
+        if not random.choice([0, 1]):
+            # mimic random error
+            raise Exception()
 
-    requests.post('https://httpbin.org/delay/5')
+        # this would block the I/O
+        requests.post('https://httpbin.org/delay/5')
+    except Exception as e:
+        logger.error('exception raised, it would be retry after 5 seconds')
+        raise self.retry(exc=e, countdown=5)
 
 
 @task_postrun.connect

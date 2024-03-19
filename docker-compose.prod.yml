@@ -30,7 +30,7 @@ services:
       - db
 
   db:
-    image: postgres:14-alpine
+    image: postgres:16-alpine
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     environment:
@@ -39,7 +39,7 @@ services:
       - POSTGRES_PASSWORD=hello_django
 
   redis:
-    image: redis:6-alpine
+    image: redis:7-alpine
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -92,26 +92,27 @@ services:
       - redis
       - db
 
-#  prometheus:
-#    image: prom/prometheus
-#    ports:
-#      - 9090:9090
-#    command:
-#      - --config.file=/etc/prometheus/prometheus.yml
-#    volumes:
-#      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
-#    depends_on:
-#      - cadvisor
-#
-#  cadvisor:
-#    image: gcr.io/cadvisor/cadvisor
-#    container_name: cadvisor
-#    volumes:
-#      - /:/rootfs:ro
-#      - /var/run:/var/run:rw
-#      - /sys:/sys:ro
-#      - /var/lib/docker/:/var/lib/docker:ro
-#      - /var/run/docker.sock:/var/run/docker.sock:ro
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - 9090:9090
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    depends_on:
+      - cadvisor
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor
+    container_name: cadvisor
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
 
 volumes:
   postgres_data:

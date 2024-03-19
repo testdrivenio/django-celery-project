@@ -1,5 +1,6 @@
 from django.db import transaction
 from django.shortcuts import render
+from functools import partial
 
 from tdd.forms import MemberForm
 from tdd.tasks import generate_avatar_thumbnail
@@ -12,7 +13,7 @@ def member_signup(request):
         if form.is_valid():
             # save form data and image
             instance = form.save()
-            transaction.on_commit(lambda: generate_avatar_thumbnail.delay(instance.pk))
+            transaction.on_commit(partial(generate_avatar_thumbnail.delay, instance.pk))
             return render(request, 'member_signup_success.html', {'member': instance})
     else:
         form = MemberForm()

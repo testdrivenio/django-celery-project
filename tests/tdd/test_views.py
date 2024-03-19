@@ -3,9 +3,9 @@ from django.urls import reverse
 from faker import Faker
 from unittest import mock
 
+from tdd import tasks
 from tdd.factories import MemberFactory
 from tdd.models import Member
-from tdd import tasks
 
 
 fake = Faker()

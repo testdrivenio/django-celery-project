@@ -8,7 +8,6 @@ from django.urls import reverse
 from polls.tasks import task_add_subscribe
 from polls.factories import UserFactory
 
-
 class UserSubscribeTestCase(TransactionTestCase):
 
     @override_settings(CELERY_TASK_ALWAYS_EAGER=True)
@@ -28,7 +27,6 @@ class UserSubscribeTestCase(TransactionTestCase):
             'https://httpbin.org/delay/5',
             data={'email': 'test@email.com'}
         )
-
 
 
 class UserSubscribeViewTestCase(TestCase):
@@ -57,7 +55,7 @@ class UserSubscribeViewTestCase(TestCase):
             user.pk
         )
 
-            
+
 class TaskAddSubscribeTest(TestCase):
     """
     Only test the Celery task

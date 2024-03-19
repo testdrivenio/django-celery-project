@@ -1,4 +1,4 @@
-FROM python:3.10-slim-buster
+FROM python:3.11-slim-buster
 
 ENV PYTHONUNBUFFERED 1
 ENV PYTHONDONTWRITEBYTECODE 1
@@ -11,7 +11,7 @@ RUN apt-get update \
   # Translations dependencies
   && apt-get install -y gettext \
   # Additional dependencies
-  && apt-get install -y procps telnet \
+  && apt-get install -y git procps telnet \
   # cleaning up unused files
   && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
   && rm -rf /var/lib/apt/lists/*
