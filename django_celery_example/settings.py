@@ -162,7 +162,7 @@ CELERY_TASK_CREATE_MISSING_QUEUES = False
 
 CELERY_TASK_QUEUES = (
     # need to define default queue here or exception would be raised
-    Queue('default'),
+    Queue(CELERY_TASK_DEFAULT_QUEUE),
 
     Queue('high_priority'),
     Queue('low_priority'),
