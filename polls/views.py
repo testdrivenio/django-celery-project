@@ -35,17 +35,6 @@ def api_call(email):
     requests.post('https://httpbin.org/delay/5')
 
 
-@csrf_exempt
-def webhook_test(request):
-    if not random.choice([0, 1]):
-        # mimic an error
-        raise Exception()
-
-    # blocking process
-    requests.post('https://httpbin.org/delay/5')
-    return HttpResponse('pong')
-
-
 def random_username():
     username = ''.join([random.choice(ascii_lowercase) for i in range(5)])
     return username
@@ -85,6 +74,17 @@ def task_status(request):
                 'state': state,
             }
         return JsonResponse(response)
+
+
+@csrf_exempt
+def webhook_test(request):
+    if not random.choice([0, 1]):
+        # mimic an error
+        raise Exception()
+
+    # blocking process
+    requests.post('https://httpbin.org/delay/5')
+    return HttpResponse('pong')
 
 
 @csrf_exempt
