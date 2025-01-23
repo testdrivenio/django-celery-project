@@ -63,15 +63,6 @@ def dynamic_example_three():
     logger.info('Example Three')
 
 
-@shared_task(bind=True, autoretry_for=(Exception,), retry_kwargs={'max_retries': 7, 'countdown': 5})
-def task_process_notification(self):
-    if not random.choice([0, 1]):
-        # mimic random error
-        raise Exception()
-
-    requests.post('https://httpbin.org/delay/5')
-
-
 @shared_task()
 def task_send_welcome_email(user_pk):
     user = User.objects.get(pk=user_pk)
