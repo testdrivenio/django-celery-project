@@ -30,8 +30,8 @@ def divide(x, y):
     # rdb.set_trace()
 
     # this is for test purposes
-    # import time
-    # time.sleep(10)
+    import time
+    time.sleep(10)
     return x / y
 
 
