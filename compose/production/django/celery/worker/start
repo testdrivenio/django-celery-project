@@ -1,7 +1,0 @@
-#!/bin/bash
-
-set -o errexit
-set -o pipefail
-set -o nounset
-
-exec celery -A django_celery_example worker -l INFO

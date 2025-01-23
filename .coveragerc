@@ -1,7 +1,0 @@
-[run]
-omit =
-    tests/*
-    */migrations/*
-    manage.py
-    tests.py
-    factories.py

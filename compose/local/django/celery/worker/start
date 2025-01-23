@@ -1,8 +1,0 @@
-#!/bin/bash
-
-set -o errexit
-set -o nounset
-
-watchfiles \
-  --filter python \
-  'celery -A django_celery_example worker --loglevel=info -Q high_priority,default'
