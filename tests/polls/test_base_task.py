@@ -1,9 +1,9 @@
 import pytest
-from unittest import mock
 from django.contrib.auth.models import User
 
 from polls.factories import UserFactory
 from polls.base_task import custom_celery_task
+from unittest import mock
 
 
 # tasks
@@ -85,3 +85,4 @@ def test_throwing_retry_task(settings):
 
         mock_retry.assert_called()
         assert 'countdown' in mock_retry.call_args.kwargs
+

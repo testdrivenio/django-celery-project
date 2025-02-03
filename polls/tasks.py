@@ -48,7 +48,6 @@ def task_clear_session():
     from django.core.management import call_command
     call_command('clearsessions')
 
-
 @shared_task(name='default:dynamic_example_one')
 def dynamic_example_one():
     logger.info('Example One')
@@ -96,3 +95,4 @@ def task_transaction_test():
     logger.info(f'send email to {user.pk}')
     # this cause db rollback because of transaction.atomic
     raise Exception('test')
+

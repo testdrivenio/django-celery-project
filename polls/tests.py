@@ -8,6 +8,7 @@ from django.urls import reverse
 from polls.tasks import task_add_subscribe
 from polls.factories import UserFactory
 
+
 class UserSubscribeTestCase(TransactionTestCase):
 
     @override_settings(CELERY_TASK_ALWAYS_EAGER=True)
@@ -81,3 +82,4 @@ class TaskAddSubscribeTest(TestCase):
 
         with self.assertRaises(Retry):
             task_add_subscribe(instance.pk)
+

@@ -4,6 +4,7 @@ https://docs.celeryq.dev/en/stable/django/first-steps-with-django.html
 import os
 import logging
 from celery.signals import after_setup_logger
+
 from celery import Celery
 
 from django.conf import settings
@@ -40,3 +41,4 @@ def on_after_setup_logger(logger, **kwargs):
     file_handler = logging.FileHandler('celery.log')
     file_handler.setFormatter(formatter)
     logger.addHandler(file_handler)
+

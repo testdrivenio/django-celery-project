@@ -30,7 +30,7 @@ services:
       - db
 
   db:
-    image: postgres:16-alpine
+    image: postgres:17-alpine
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     environment:
@@ -42,7 +42,7 @@ services:
     image: redis:7-alpine
 
   rabbitmq:
-    image: rabbitmq:3-management
+    image: rabbitmq:4-management
     env_file:
       - ./.env/.prod-sample
 
@@ -113,9 +113,9 @@ services:
       - /var/lib/docker/:/var/lib/docker:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
 
-
 volumes:
   postgres_data:
   staticfiles:
   mediafiles:
   flower_db:
+

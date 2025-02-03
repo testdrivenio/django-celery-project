@@ -19,3 +19,4 @@ urlpatterns = [
     path('transaction_celery/', transaction_celery, name='transaction_celery'),
     path('user_subscribe/', user_subscribe, name='user_subscribe'),
 ]
+

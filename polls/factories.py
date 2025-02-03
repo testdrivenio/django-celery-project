@@ -15,3 +15,4 @@ class UserFactory(DjangoModelFactory):
     password = LazyAttribute(lambda o: make_password(o.username))
     first_name = Faker("first_name")
     last_name = Faker("last_name")
+

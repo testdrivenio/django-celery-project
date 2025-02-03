@@ -21,15 +21,10 @@ from polls.tasks import (
     task_add_subscribe,
 )
 
-
 logger = logging.getLogger(__name__)
 
 
 # helpers
-def random_username():
-    username = ''.join([random.choice(ascii_lowercase) for i in range(5)])
-    return username
-
 
 def api_call(email):
     # used for testing a failed api call
@@ -38,6 +33,11 @@ def api_call(email):
 
     # used for simulating a call to a third-party api
     requests.post('https://httpbin.org/delay/5')
+
+
+def random_username():
+    username = ''.join([random.choice(ascii_lowercase) for i in range(5)])
+    return username
 
 
 # views

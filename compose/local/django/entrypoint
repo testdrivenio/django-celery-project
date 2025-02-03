@@ -11,17 +11,17 @@ postgres_ready() {
 python << END
 import sys
 
-import psycopg2
+import psycopg
 
 try:
-    psycopg2.connect(
+    psycopg.connect(
         dbname="${SQL_DATABASE}",
         user="${SQL_USER}",
         password="${SQL_PASSWORD}",
         host="${SQL_HOST}",
         port="${SQL_PORT}",
     )
-except psycopg2.OperationalError:
+except psycopg.OperationalError:
     sys.exit(-1)
 sys.exit(0)
 

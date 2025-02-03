@@ -13,7 +13,7 @@ def member_signup(request):
         if form.is_valid():
             # save form data and image
             instance = form.save()
-            transaction.on_commit(partial(generate_avatar_thumbnail.delay, instance.pk))
+            transaction.on_commit(partial(generate_avatar_thumbnail.delay, instance.pk))           # new
             return render(request, 'member_signup_success.html', {'member': instance})
     else:
         form = MemberForm()
